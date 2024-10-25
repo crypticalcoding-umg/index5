@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fracciones Parciales</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/10.6.4/math.min.js"></script>
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+            background-color: #000000; 
+            color: #0059ff; 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            padding: 20px; 
+        }
+        .calculator { 
+            border: 1px solid #ccc; 
+            padding: 20px; 
+            border-radius: 10px; 
+            width: 100%; 
+            max-width: 600px; 
+            background: #fff; 
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1); 
+        }
+        .calculator input, .calculator button { 
+            width: 100%; 
+            padding: 10px; 
+            margin: 5px 0; 
+            border-radius: 5px; 
+            border: 1px solid #ccc; 
+            font-size: 1em; 
+        }
+        .result { 
+            font-weight: bold; 
+            color: #008cff; 
+            margin-top: 10px; 
+            white-space: pre-wrap;
+        }
+        .steps {
+            margin-top: 15px;
+            padding: 10px;
+            background-color: #f8f9fa;
+            border-radius: 5px;
+        }
+        button {
+            background-color: #2b6cb0;
+            color: white;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #0011ff;
+        }
+        .error {
+            color: #dc2626;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <h1>Fracciones Parciales</h1>
+    <div class="calculator">
+        <label for="numerator">Numerador (en función de x):</label>
+        <input type="text" id="numerator" placeholder="Ej. 2*x^2 + 3">
+        
+        <label for="denominator">Denominador (en función de x):</label>
+        <input type="text" id="denominator" placeholder="Ej. x*(x + 1)">
+        
+        <button onclick="calculateFracPartial()">Calcular Fracciones Parciales</button>
+        <div class="steps" id="steps-output"></div>
+        <div class="result" id="result-output"></div>
+    </div>
+    <script>
+        function findFactors(polynomial) {
+            try {
+                // Simplifica el caso para polinomios simples
+                const terms = polynomial.split('*');
+                let factors = [];
+                
+                terms.forEach(term => {
+                    term = term.trim();
+                    if (term.includes('x')) {
+                        if (term.includes('+')) {
+                            const [x, constant] = term.split('+').map(t => t.trim());
+                            factors.push({factor: `(x + ${constant})`, power: 1});
+                        } else if (term === 'x') {
+                            factors.push({factor: 'x', power: 1});
+                        }
+                    }
+                });
+                
+                return factors;
+            } catch (error) {
+                console.error('Error al encontrar factores:', error);
+                return [];
+            }
+        }
+
+        function calculateFracPartial() {
+            const numerator = document.getElementById("numerator").value;
+            const denominator = document.getElementById("denominator").value;
+            const stepsOutput = document.getElementById("steps-output");
+            const resultOutput = document.getElementById("result-output");
+            
+            try {
+                // Encuentra los factores del denominador
+                const factors = findFactors(denominator);
+                
+                if (factors.length === 0) {
+                    throw new Error("No se pudieron identificar los factores del denominador");
+                }
+                
+                let steps = "Pasos de la descomposición:\n\n";
+                steps += `1. Expresión original: (${numerator})/(${denominator})\n\n`;
+                steps += "2. Factores del denominador:\n";
+                factors.forEach(f => steps += `   ${f.factor} con potencia ${f.power}\n`);
+                
+                let decomposition = "La descomposición en fracciones parciales es:\n\n";
+                const terms = factors.map((f, i) => {
+                    if (f.factor === 'x') {
+                        return `A${i}/${f.factor}`;
+                    } else {
+                        return `A${i}/${f.factor}`;
+                    }
+                });
+                
+                decomposition += terms.join(" + ");
+                
+                stepsOutput.innerHTML = steps;
+                resultOutput.innerHTML = decomposition;
+                
+            } catch (error) {
+                stepsOutput.innerHTML = "";
+                resultOutput.innerHTML = `<span class="error">Error: ${error.message}</span>`;
+            }
+        }
+    </script>
+</body>
+</html>
